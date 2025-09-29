@@ -56,7 +56,7 @@ jobs:
           framework: terraform
 
       - name: Comment on Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
