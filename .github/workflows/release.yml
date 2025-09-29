@@ -1,0 +1,23 @@
+name: Release Terraform Module
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+(-[a-zA-Z0-9]+)?" # Semantic versioning tags with optional suffix
+
+jobs:
+  release:
+    name: Publish to Terraform Registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Publish module
+        run: terraform login && terraform publish
