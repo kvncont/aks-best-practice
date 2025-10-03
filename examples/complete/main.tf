@@ -1,13 +1,16 @@
 module "aks" {
   source = "../../"
 
-  # Resource Group
-  resource_group_name = "rg-aks-example"
-  location            = "eastus"
+  # Naming Configuration
+  owner = "myteam"
+  name  = "example"
+  env   = "prod"
+
+  # Location
+  location = "eastus"
 
   # Network Configuration - Create new VNet
   create_vnet                       = true
-  vnet_name                         = "vnet-aks-example"
   vnet_address_space                = ["10.0.0.0/16"]
   subnet_name                       = "subnet-aks"
   subnet_address_prefix             = "10.0.1.0/24"
@@ -15,8 +18,6 @@ module "aks" {
   app_gateway_subnet_address_prefix = "10.0.2.0/24"
 
   # AKS Configuration
-  aks_name                = "aks-example"
-  aks_dns_prefix          = "aks-example"
   kubernetes_version      = "1.28"
   private_cluster_enabled = true
   sku_tier                = "Standard"
@@ -55,18 +56,15 @@ module "aks" {
   dns_service_ip      = "10.245.0.10"
 
   # Azure Container Registry
-  acr_name                          = "acraksexample"
   acr_sku                           = "Premium"
   acr_public_network_access_enabled = false
 
   # Application Gateway
-  app_gateway_name     = "appgw-aks-example"
   app_gateway_sku      = "Standard_v2"
   app_gateway_capacity = 2
 
   # Log Analytics
   enable_log_analytics         = true
-  log_analytics_workspace_name = "log-aks-example"
   log_analytics_sku            = "PerGB2018"
   log_analytics_retention_days = 30
 
@@ -91,9 +89,6 @@ module "aks" {
       email_address = "admin@example.com"
     }
   ]
-
-  # User Assigned Identity
-  identity_name = "id-aks-example"
 
   # Tags
   tags = {

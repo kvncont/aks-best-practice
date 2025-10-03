@@ -1,7 +1,24 @@
+# Naming Configuration
+variable "owner" {
+  type        = string
+  description = "Owner or team name for resource naming"
+}
+
+variable "name" {
+  type        = string
+  description = "Base name for resources (e.g., 'myapp')"
+}
+
+variable "env" {
+  type        = string
+  description = "Environment name (e.g., 'dev', 'prod', 'staging')"
+}
+
 # Resource Group
 variable "resource_group_name" {
   type        = string
-  description = "Name of the resource group"
+  description = "Name of the resource group (optional, defaults to rg-{owner}-{name}-{env})"
+  default     = null
 }
 
 variable "location" {
@@ -24,7 +41,7 @@ variable "create_vnet" {
 
 variable "vnet_name" {
   type        = string
-  description = "Name of the virtual network (required if create_vnet is true)"
+  description = "Name of the virtual network (optional, defaults to vnet-{owner}-{name}-{env})"
   default     = null
 }
 
@@ -74,12 +91,14 @@ variable "network_plugin" {
 # AKS Configuration
 variable "aks_name" {
   type        = string
-  description = "Name of the AKS cluster"
+  description = "Name of the AKS cluster (optional, defaults to aks-{owner}-{name}-{env})"
+  default     = null
 }
 
 variable "aks_dns_prefix" {
   type        = string
-  description = "DNS prefix for the AKS cluster"
+  description = "DNS prefix for the AKS cluster (optional, defaults to {owner}-{name}-{env})"
+  default     = null
 }
 
 variable "kubernetes_version" {
@@ -204,7 +223,8 @@ variable "dns_service_ip" {
 # Azure Container Registry
 variable "acr_name" {
   type        = string
-  description = "Name of the Azure Container Registry"
+  description = "Name of the Azure Container Registry (optional, defaults to acr{owner}{name}{env} - alphanumeric only)"
+  default     = null
 }
 
 variable "acr_sku" {
@@ -226,7 +246,8 @@ variable "acr_public_network_access_enabled" {
 # Application Gateway
 variable "app_gateway_name" {
   type        = string
-  description = "Name of the Application Gateway"
+  description = "Name of the Application Gateway (optional, defaults to agw-{owner}-{name}-{env})"
+  default     = null
 }
 
 variable "app_gateway_sku" {
@@ -250,7 +271,7 @@ variable "enable_log_analytics" {
 
 variable "log_analytics_workspace_name" {
   type        = string
-  description = "Name of the Log Analytics workspace"
+  description = "Name of the Log Analytics workspace (optional, defaults to log-{owner}-{name}-{env})"
   default     = null
 }
 
@@ -306,7 +327,7 @@ variable "enable_alerts" {
 
 variable "action_group_name" {
   type        = string
-  description = "Name of the action group for alerts"
+  description = "Name of the action group for alerts (optional, defaults to ag-{owner}-{name}-{env})"
   default     = null
 }
 
@@ -328,6 +349,6 @@ variable "alert_email_receivers" {
 # User Assigned Identity
 variable "identity_name" {
   type        = string
-  description = "Name of the user-assigned managed identity"
+  description = "Name of the user-assigned managed identity (optional, defaults to id-{owner}-{name}-{env})"
   default     = null
 }

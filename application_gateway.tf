@@ -1,5 +1,5 @@
 resource "azurerm_public_ip" "app_gateway" {
-  name                = "${var.app_gateway_name}-pip"
+  name                = "${local.app_gateway_name}-pip"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   allocation_method   = "Static"
@@ -8,7 +8,7 @@ resource "azurerm_public_ip" "app_gateway" {
 }
 
 resource "azurerm_application_gateway" "main" {
-  name                = var.app_gateway_name
+  name                = local.app_gateway_name
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   tags                = var.tags

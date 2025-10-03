@@ -1,10 +1,6 @@
-locals {
-  log_analytics_name = var.log_analytics_workspace_name != null ? var.log_analytics_workspace_name : "${var.aks_name}-log-analytics"
-}
-
 resource "azurerm_log_analytics_workspace" "main" {
   count               = var.enable_log_analytics ? 1 : 0
-  name                = local.log_analytics_name
+  name                = local.log_analytics_workspace_name
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   sku                 = var.log_analytics_sku

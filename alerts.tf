@@ -1,7 +1,3 @@
-locals {
-  action_group_name = var.action_group_name != null ? var.action_group_name : "${var.aks_name}-action-group"
-}
-
 resource "azurerm_monitor_action_group" "main" {
   count               = var.enable_alerts && length(var.alert_email_receivers) > 0 ? 1 : 0
   name                = local.action_group_name
@@ -21,7 +17,7 @@ resource "azurerm_monitor_action_group" "main" {
 # Alert for node CPU usage
 resource "azurerm_monitor_metric_alert" "node_cpu" {
   count               = var.enable_alerts && length(var.alert_email_receivers) > 0 ? 1 : 0
-  name                = "${var.aks_name}-node-cpu-alert"
+  name                = "${local.aks_name}-node-cpu-alert"
   resource_group_name = azurerm_resource_group.main.name
   scopes              = [azurerm_kubernetes_cluster.main.id]
   description         = "Alert when node CPU usage exceeds 80%"
@@ -46,7 +42,7 @@ resource "azurerm_monitor_metric_alert" "node_cpu" {
 # Alert for node memory usage
 resource "azurerm_monitor_metric_alert" "node_memory" {
   count               = var.enable_alerts && length(var.alert_email_receivers) > 0 ? 1 : 0
-  name                = "${var.aks_name}-node-memory-alert"
+  name                = "${local.aks_name}-node-memory-alert"
   resource_group_name = azurerm_resource_group.main.name
   scopes              = [azurerm_kubernetes_cluster.main.id]
   description         = "Alert when node memory usage exceeds 80%"
@@ -71,7 +67,7 @@ resource "azurerm_monitor_metric_alert" "node_memory" {
 # Alert for pod count
 resource "azurerm_monitor_metric_alert" "pod_count" {
   count               = var.enable_alerts && length(var.alert_email_receivers) > 0 ? 1 : 0
-  name                = "${var.aks_name}-pod-count-alert"
+  name                = "${local.aks_name}-pod-count-alert"
   resource_group_name = azurerm_resource_group.main.name
   scopes              = [azurerm_kubernetes_cluster.main.id]
   description         = "Alert when pod count exceeds 80% of capacity"
@@ -96,7 +92,7 @@ resource "azurerm_monitor_metric_alert" "pod_count" {
 # Alert for disk usage
 resource "azurerm_monitor_metric_alert" "disk_usage" {
   count               = var.enable_alerts && length(var.alert_email_receivers) > 0 ? 1 : 0
-  name                = "${var.aks_name}-disk-usage-alert"
+  name                = "${local.aks_name}-disk-usage-alert"
   resource_group_name = azurerm_resource_group.main.name
   scopes              = [azurerm_kubernetes_cluster.main.id]
   description         = "Alert when disk usage exceeds 80%"

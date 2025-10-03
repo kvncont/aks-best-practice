@@ -31,41 +31,37 @@ This Terraform module creates a comprehensive Azure Kubernetes Service (AKS) inf
 
 ## Usage
 
+The module uses a consistent naming convention for all resources: `{prefix}-{owner}-{name}-{env}`, where:
+- `prefix`: Resource-specific prefix (e.g., `aks`, `acr`, `rg`, `vnet`, `agw`, `log`, `id`, `ag`)
+- `owner`: Owner or team name
+- `name`: Base name for the application/workload
+- `env`: Environment (e.g., dev, prod, staging)
+
+All resource names are optional. If not provided, they will be automatically generated using this pattern.
+
 ### Complete Example
 
 ```hcl
 module "aks" {
   source = "github.com/kvncont/aks-best-practice.git"
 
-  # Resource Group
-  resource_group_name = "rg-aks-example"
-  location            = "eastus"
+  # Naming Configuration (required)
+  owner = "myteam"
+  name  = "webapp"
+  env   = "prod"
+
+  # Location
+  location = "eastus"
 
   # Network Configuration
-  create_vnet              = true
-  vnet_name                = "vnet-aks-example"
-  vnet_address_space       = ["10.0.0.0/16"]
-  subnet_name              = "subnet-aks"
-  subnet_address_prefix    = "10.0.1.0/24"
-  app_gateway_subnet_name  = "subnet-appgw"
-  app_gateway_subnet_address_prefix = "10.0.2.0/24"
-
-  # AKS Configuration
-  aks_name               = "aks-example"
-  aks_dns_prefix         = "aks-example"
-  private_cluster_enabled = true
+  create_vnet        = true
+  vnet_address_space = ["10.0.0.0/16"]
 
   # Default Node Pool
-  default_node_pool_vm_size            = "Standard_D2s_v3"
+  default_node_pool_vm_size             = "Standard_D2s_v3"
   default_node_pool_enable_auto_scaling = true
-  default_node_pool_min_count          = 2
-  default_node_pool_max_count          = 5
-
-  # Azure Container Registry
-  acr_name = "acraksexample"
-
-  # Application Gateway
-  app_gateway_name = "appgw-aks-example"
+  default_node_pool_min_count           = 2
+  default_node_pool_max_count           = 5
 
   # Optional: Log Analytics
   enable_log_analytics = true
@@ -95,22 +91,41 @@ module "aks" {
 module "aks" {
   source = "github.com/kvncont/aks-best-practice.git"
 
-  resource_group_name = "rg-aks-minimal"
-  location            = "eastus"
+  # Naming Configuration
+  owner = "myteam"
+  name  = "app"
+  env   = "dev"
 
-  create_vnet              = true
-  vnet_name                = "vnet-aks-minimal"
-  subnet_name              = "subnet-aks"
-  app_gateway_subnet_name  = "subnet-appgw"
+  # Location
+  location = "eastus"
 
-  aks_name               = "aks-minimal"
-  aks_dns_prefix         = "aks-minimal"
-  acr_name               = "acraksminimal"
-  app_gateway_name       = "appgw-aks-minimal"
-
+  # Disable optional features
   enable_log_analytics       = false
   enable_diagnostic_settings = false
   enable_alerts              = false
+}
+```
+
+### Custom Resource Names
+
+You can override any resource name while still using the naming convention for others:
+
+```hcl
+module "aks" {
+  source = "github.com/kvncont/aks-best-practice.git"
+
+  # Naming Configuration
+  owner = "myteam"
+  name  = "app"
+  env   = "prod"
+
+  # Location
+  location = "eastus"
+
+  # Custom names (optional)
+  aks_name         = "my-custom-aks-name"
+  acr_name         = "mycustomacrname"  # ACR names must be alphanumeric
+  app_gateway_name = "my-custom-gateway"
 }
 ```
 
@@ -120,19 +135,20 @@ module "aks" {
 module "aks" {
   source = "github.com/kvncont/aks-best-practice.git"
 
-  resource_group_name = "rg-aks-existing-vnet"
-  location            = "eastus"
+module "aks" {
+  source = "github.com/kvncont/aks-best-practice.git"
 
-  create_vnet              = false
-  vnet_name                = "existing-vnet"
-  vnet_resource_group_name = "rg-network"
-  subnet_name              = "existing-subnet"
-  subnet_id                = "/subscriptions/.../subnets/existing-subnet"
+  # Naming Configuration
+  owner = "myteam"
+  name  = "app"
+  env   = "prod"
 
-  aks_name         = "aks-existing-vnet"
-  aks_dns_prefix   = "aks-existing-vnet"
-  acr_name         = "acraksexisting"
-  app_gateway_name = "appgw-aks-existing"
+  # Location
+  location = "eastus"
+
+  # Use existing VNet
+  create_vnet = false
+  subnet_id   = "/subscriptions/.../subnets/existing-subnet"
 }
 ```
 
@@ -141,6 +157,7 @@ module "aks" {
 The module is organized into the following files:
 
 - `main.tf` - Resource group creation
+- `locals.tf` - Local values for resource naming
 - `variables.tf` - Input variable definitions
 - `outputs.tf` - Output value definitions
 - `providers.tf` - Provider requirements
@@ -163,20 +180,35 @@ The module is organized into the following files:
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| resource_group_name | Name of the resource group | `string` | n/a | yes |
-| location | Azure region where resources will be deployed | `string` | n/a | yes |
-| aks_name | Name of the AKS cluster | `string` | n/a | yes |
-| aks_dns_prefix | DNS prefix for the AKS cluster | `string` | n/a | yes |
-| acr_name | Name of the Azure Container Registry | `string` | n/a | yes |
-| app_gateway_name | Name of the Application Gateway | `string` | n/a | yes |
-| create_vnet | Whether to create a new virtual network | `bool` | `true` | no |
-| vnet_name | Name of the virtual network | `string` | `null` | no |
-| private_cluster_enabled | Whether to enable private cluster mode | `bool` | `true` | no |
-| enable_log_analytics | Enable Log Analytics workspace | `bool` | `true` | no |
-| enable_diagnostic_settings | Enable diagnostic settings for AKS | `bool` | `true` | no |
-| enable_alerts | Enable monitoring alerts | `bool` | `true` | no |
+### Required Inputs
+
+| Name | Description | Type |
+|------|-------------|------|
+| owner | Owner or team name for resource naming | `string` |
+| name | Base name for resources | `string` |
+| env | Environment name (e.g., 'dev', 'prod', 'staging') | `string` |
+| location | Azure region where resources will be deployed | `string` |
+
+### Optional Inputs
+
+All resource names are optional and will be auto-generated using the `{prefix}-{owner}-{name}-{env}` pattern:
+
+| Name | Description | Type | Default |
+|------|-------------|------|---------|
+| resource_group_name | Name of the resource group | `string` | `rg-{owner}-{name}-{env}` |
+| aks_name | Name of the AKS cluster | `string` | `aks-{owner}-{name}-{env}` |
+| aks_dns_prefix | DNS prefix for the AKS cluster | `string` | `{owner}-{name}-{env}` |
+| acr_name | Name of the Azure Container Registry | `string` | `acr{owner}{name}{env}` (alphanumeric) |
+| app_gateway_name | Name of the Application Gateway | `string` | `agw-{owner}-{name}-{env}` |
+| vnet_name | Name of the virtual network | `string` | `vnet-{owner}-{name}-{env}` |
+| identity_name | Name of the user-assigned managed identity | `string` | `id-{owner}-{name}-{env}` |
+| log_analytics_workspace_name | Name of the Log Analytics workspace | `string` | `log-{owner}-{name}-{env}` |
+| action_group_name | Name of the action group for alerts | `string` | `ag-{owner}-{name}-{env}` |
+| create_vnet | Whether to create a new virtual network | `bool` | `true` |
+| private_cluster_enabled | Whether to enable private cluster mode | `bool` | `true` |
+| enable_log_analytics | Enable Log Analytics workspace | `bool` | `true` |
+| enable_diagnostic_settings | Enable diagnostic settings for AKS | `bool` | `true` |
+| enable_alerts | Enable monitoring alerts | `bool` | `true` |
 
 For a complete list of inputs, see [variables.tf](variables.tf).
 

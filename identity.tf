@@ -1,7 +1,3 @@
-locals {
-  identity_name = var.identity_name != null ? var.identity_name : "${var.aks_name}-identity"
-}
-
 resource "azurerm_user_assigned_identity" "main" {
   name                = local.identity_name
   location            = azurerm_resource_group.main.location

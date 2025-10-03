@@ -17,7 +17,7 @@ output "vnet_id" {
 
 output "vnet_name" {
   description = "Name of the virtual network"
-  value       = var.create_vnet ? azurerm_virtual_network.main[0].name : var.vnet_name
+  value       = var.create_vnet ? azurerm_virtual_network.main[0].name : local.vnet_name
 }
 
 output "aks_subnet_id" {
