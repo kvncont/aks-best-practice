@@ -44,14 +44,16 @@ resource "azurerm_kubernetes_cluster" "main" {
     }
   }
 
-  ingress_application_gateway {
-    gateway_id = azurerm_application_gateway.main.id
+  dynamic "ingress_application_gateway" {
+    for_each = var.enable_agic ? [1] : []
+    content {
+      gateway_id = var.create_app_gateway ? azurerm_application_gateway.main[0].id : var.existing_app_gateway_id
+    }
   }
 
   depends_on = [
     azurerm_role_assignment.network_contributor,
-    azurerm_role_assignment.acr_pull,
-    azurerm_application_gateway.main
+    azurerm_role_assignment.acr_pull
   ]
 }
 

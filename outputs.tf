@@ -80,33 +80,33 @@ output "aks_oidc_issuer_url" {
 # ACR
 output "acr_id" {
   description = "ID of the Azure Container Registry"
-  value       = azurerm_container_registry.main.id
+  value       = var.create_acr ? azurerm_container_registry.main[0].id : var.existing_acr_id
 }
 
 output "acr_name" {
   description = "Name of the Azure Container Registry"
-  value       = azurerm_container_registry.main.name
+  value       = var.create_acr ? azurerm_container_registry.main[0].name : null
 }
 
 output "acr_login_server" {
   description = "Login server of the Azure Container Registry"
-  value       = azurerm_container_registry.main.login_server
+  value       = var.create_acr ? azurerm_container_registry.main[0].login_server : null
 }
 
 # Application Gateway
 output "app_gateway_id" {
   description = "ID of the Application Gateway"
-  value       = azurerm_application_gateway.main.id
+  value       = var.create_app_gateway ? azurerm_application_gateway.main[0].id : var.existing_app_gateway_id
 }
 
 output "app_gateway_name" {
   description = "Name of the Application Gateway"
-  value       = azurerm_application_gateway.main.name
+  value       = var.create_app_gateway ? azurerm_application_gateway.main[0].name : null
 }
 
 output "app_gateway_public_ip" {
   description = "Public IP address of the Application Gateway"
-  value       = azurerm_public_ip.app_gateway.ip_address
+  value       = var.create_app_gateway ? azurerm_public_ip.app_gateway[0].ip_address : null
 }
 
 # Log Analytics

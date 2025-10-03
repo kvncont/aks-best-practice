@@ -3,8 +3,8 @@
 This Terraform module creates a comprehensive Azure Kubernetes Service (AKS) infrastructure with best practices, including:
 
 - Azure Kubernetes Service (AKS) cluster with Azure CNI Overlay
-- Azure Container Registry (ACR) with private access
-- Application Gateway for ingress controller
+- Azure Container Registry (ACR) - optional: create new, use existing, or skip
+- Application Gateway for ingress controller - optional: create new, use existing, or skip
 - User-assigned managed identity with required permissions
 - Optional Log Analytics workspace and Container Insights
 - Optional diagnostic settings
@@ -17,7 +17,8 @@ This Terraform module creates a comprehensive Azure Kubernetes Service (AKS) inf
 - **Private Resources**: All resources are configured for private access by default
 - **Flexible Networking**: Can create new VNet or use existing infrastructure
 - **Azure CNI Overlay**: Uses Azure CNI Overlay for efficient IP address management
-- **Application Gateway Ingress Controller**: Integrated AGIC for AKS
+- **Optional ACR**: Create new ACR, use existing ACR, or skip ACR entirely
+- **Optional Application Gateway**: Create new App Gateway, use existing, or skip AGIC
 - **Auto-scaling**: Support for cluster autoscaling
 - **Multiple Node Pools**: Support for default and additional node pools
 - **Monitoring**: Optional Log Analytics, diagnostic settings, and alerts
@@ -32,7 +33,7 @@ This Terraform module creates a comprehensive Azure Kubernetes Service (AKS) inf
 ## Usage
 
 The module uses a consistent naming convention for all resources: `{prefix}-{owner}-{name}-{env}`, where:
-- `prefix`: Resource-specific prefix (e.g., `aks`, `acr`, `rg`, `vnet`, `agw`, `log`, `uai`, `ag`)
+- `prefix`: Resource-specific prefix (e.g., `aks`, `acr`, `rg`, `vnet`, `agw`, `pip`, `log`, `uai`, `ag`)
 - `owner`: Owner or team name
 - `name`: Base name for the application/workload
 - `env`: Environment (e.g., dev, prod, staging)
@@ -146,6 +147,54 @@ module "aks" {
   # Use existing VNet
   create_vnet = false
   subnet_id   = "/subscriptions/.../subnets/existing-subnet"
+}
+```
+
+### Using Existing ACR and Application Gateway
+
+```hcl
+module "aks" {
+  source = "github.com/kvncont/aks-best-practice.git"
+
+  # Naming Configuration
+  owner = "myteam"
+  name  = "app"
+  env   = "prod"
+
+  # Location
+  location = "eastus"
+
+  # Use existing ACR
+  create_acr      = false
+  existing_acr_id = "/subscriptions/.../resourceGroups/shared-rg/providers/Microsoft.ContainerRegistry/registries/sharedacr"
+
+  # Use existing Application Gateway
+  create_app_gateway       = false
+  enable_agic              = true
+  existing_app_gateway_id  = "/subscriptions/.../resourceGroups/shared-rg/providers/Microsoft.Network/applicationGateways/shared-agw"
+}
+```
+
+### Without ACR and Application Gateway
+
+```hcl
+module "aks" {
+  source = "github.com/kvncont/aks-best-practice.git"
+
+  # Naming Configuration
+  owner = "myteam"
+  name  = "app"
+  env   = "dev"
+
+  # Location
+  location = "eastus"
+
+  # Skip ACR creation
+  create_acr = false
+
+  # Skip Application Gateway and AGIC
+  create_app_gateway = false
+  enable_agic        = false
 }
 ```
 
@@ -292,8 +341,21 @@ All resource names are optional and will be auto-generated using the `{prefix}-{
 | aks_dns_prefix | DNS prefix for the AKS cluster | `string` | `{owner}-{name}-{env}` |
 | acr_name | Name of the Azure Container Registry | `string` | `acr{owner}{name}{env}` (alphanumeric) |
 | app_gateway_name | Name of the Application Gateway | `string` | `agw-{owner}-{name}-{env}` |
+| app_gateway_pip_name | Name of the Application Gateway Public IP | `string` | `pip-{app_gateway_name}` |
 | vnet_name | Name of the virtual network | `string` | `vnet-{owner}-{name}-{env}` |
 | identity_name | Name of the user-assigned managed identity | `string` | `uai-{owner}-{name}-{env}` |
+| log_analytics_workspace_name | Name of the Log Analytics workspace | `string` | `log-{owner}-{name}-{env}` |
+| action_group_name | Name of the action group for alerts | `string` | `ag-{owner}-{name}-{env}` |
+| create_vnet | Whether to create a new virtual network | `bool` | `true` |
+| create_acr | Whether to create a new Azure Container Registry | `bool` | `true` |
+| existing_acr_id | ID of existing ACR to use (if create_acr is false) | `string` | `null` |
+| create_app_gateway | Whether to create a new Application Gateway | `bool` | `true` |
+| existing_app_gateway_id | ID of existing App Gateway (if create_app_gateway is false) | `string` | `null` |
+| enable_agic | Whether to enable Application Gateway Ingress Controller | `bool` | `true` |
+| private_cluster_enabled | Whether to enable private cluster mode | `bool` | `true` |
+| enable_log_analytics | Enable Log Analytics workspace | `bool` | `true` |
+| enable_diagnostic_settings | Enable diagnostic settings for AKS | `bool` | `true` |
+| enable_alerts | Enable monitoring alerts | `bool` | `true` |
 | log_analytics_workspace_name | Name of the Log Analytics workspace | `string` | `log-{owner}-{name}-{env}` |
 | action_group_name | Name of the action group for alerts | `string` | `ag-{owner}-{name}-{env}` |
 | create_vnet | Whether to create a new virtual network | `bool` | `true` |

@@ -94,6 +94,12 @@ variable "app_gateway_subnet_address_prefix" {
   default     = "10.0.2.0/24"
 }
 
+variable "app_gateway_subnet_id" {
+  type        = string
+  description = "ID of existing subnet for Application Gateway (required if create_vnet is false and create_app_gateway is true)"
+  default     = null
+}
+
 # Network Configuration for AKS
 variable "network_plugin" {
   type        = string
@@ -237,6 +243,19 @@ variable "dns_service_ip" {
 }
 
 # Azure Container Registry
+# Azure Container Registry
+variable "create_acr" {
+  type        = bool
+  description = "Whether to create a new Azure Container Registry"
+  default     = true
+}
+
+variable "existing_acr_id" {
+  type        = string
+  description = "ID of existing Azure Container Registry to use (only used if create_acr is false)"
+  default     = null
+}
+
 variable "acr_name" {
   type        = string
   description = "Name of the Azure Container Registry (optional, defaults to acr{owner}{name}{env} - alphanumeric only)"
@@ -260,9 +279,33 @@ variable "acr_public_network_access_enabled" {
 }
 
 # Application Gateway
+variable "create_app_gateway" {
+  type        = bool
+  description = "Whether to create a new Application Gateway"
+  default     = true
+}
+
+variable "existing_app_gateway_id" {
+  type        = string
+  description = "ID of existing Application Gateway to use (only used if create_app_gateway is false and enable_agic is true)"
+  default     = null
+}
+
+variable "enable_agic" {
+  type        = bool
+  description = "Whether to enable Application Gateway Ingress Controller on AKS"
+  default     = true
+}
+
 variable "app_gateway_name" {
   type        = string
   description = "Name of the Application Gateway (optional, defaults to agw-{owner}-{name}-{env})"
+  default     = null
+}
+
+variable "app_gateway_pip_name" {
+  type        = string
+  description = "Name of the Application Gateway Public IP (optional, defaults to pip-{app_gateway_name})"
   default     = null
 }
 

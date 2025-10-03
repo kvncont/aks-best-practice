@@ -1,5 +1,6 @@
 resource "azurerm_public_ip" "app_gateway" {
-  name                = "${local.app_gateway_name}-pip"
+  count               = var.create_app_gateway ? 1 : 0
+  name                = local.app_gateway_pip_name
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
   allocation_method   = "Static"
@@ -8,6 +9,7 @@ resource "azurerm_public_ip" "app_gateway" {
 }
 
 resource "azurerm_application_gateway" "main" {
+  count               = var.create_app_gateway ? 1 : 0
   name                = local.app_gateway_name
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
@@ -21,7 +23,7 @@ resource "azurerm_application_gateway" "main" {
 
   gateway_ip_configuration {
     name      = "appGatewayIpConfig"
-    subnet_id = var.create_vnet ? azurerm_subnet.app_gateway[0].id : null
+    subnet_id = var.create_vnet ? azurerm_subnet.app_gateway[0].id : var.app_gateway_subnet_id
   }
 
   frontend_port {
@@ -36,7 +38,7 @@ resource "azurerm_application_gateway" "main" {
 
   frontend_ip_configuration {
     name                 = "frontendIpConfig"
-    public_ip_address_id = azurerm_public_ip.app_gateway.id
+    public_ip_address_id = azurerm_public_ip.app_gateway[0].id
   }
 
   backend_address_pool {

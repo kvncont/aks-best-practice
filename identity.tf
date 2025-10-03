@@ -14,7 +14,8 @@ resource "azurerm_role_assignment" "network_contributor" {
 
 # Assign AcrPull role to the identity on the ACR
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = azurerm_container_registry.main.id
+  count                = var.create_acr || var.existing_acr_id != null ? 1 : 0
+  scope                = var.create_acr ? azurerm_container_registry.main[0].id : var.existing_acr_id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_user_assigned_identity.main.principal_id
 }
@@ -28,7 +29,8 @@ resource "azurerm_role_assignment" "managed_identity_operator" {
 
 # Assign Contributor role to the identity on the Application Gateway
 resource "azurerm_role_assignment" "app_gateway_contributor" {
-  scope                = azurerm_application_gateway.main.id
+  count                = var.enable_agic ? 1 : 0
+  scope                = var.create_app_gateway ? azurerm_application_gateway.main[0].id : var.existing_app_gateway_id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.main.principal_id
 }
