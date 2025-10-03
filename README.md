@@ -32,7 +32,7 @@ This Terraform module creates a comprehensive Azure Kubernetes Service (AKS) inf
 ## Usage
 
 The module uses a consistent naming convention for all resources: `{prefix}-{owner}-{name}-{env}`, where:
-- `prefix`: Resource-specific prefix (e.g., `aks`, `acr`, `rg`, `vnet`, `agw`, `log`, `id`, `ag`)
+- `prefix`: Resource-specific prefix (e.g., `aks`, `acr`, `rg`, `vnet`, `agw`, `log`, `uai`, `ag`)
 - `owner`: Owner or team name
 - `name`: Base name for the application/workload
 - `env`: Environment (e.g., dev, prod, staging)
@@ -165,8 +165,7 @@ The module is organized into the following files:
 - `identity.tf` - User-assigned managed identity and role assignments
 - `acr.tf` - Azure Container Registry
 - `log_analytics.tf` - Log Analytics workspace and Container Insights
-- `aks.tf` - AKS cluster configuration
-- `node_pools.tf` - Additional node pools
+- `aks.tf` - AKS cluster configuration and additional node pools
 - `application_gateway.tf` - Application Gateway
 - `diagnostic_settings.tf` - Diagnostic settings for AKS
 - `alerts.tf` - Monitoring alerts
@@ -201,7 +200,7 @@ All resource names are optional and will be auto-generated using the `{prefix}-{
 | acr_name | Name of the Azure Container Registry | `string` | `acr{owner}{name}{env}` (alphanumeric) |
 | app_gateway_name | Name of the Application Gateway | `string` | `agw-{owner}-{name}-{env}` |
 | vnet_name | Name of the virtual network | `string` | `vnet-{owner}-{name}-{env}` |
-| identity_name | Name of the user-assigned managed identity | `string` | `id-{owner}-{name}-{env}` |
+| identity_name | Name of the user-assigned managed identity | `string` | `uai-{owner}-{name}-{env}` |
 | log_analytics_workspace_name | Name of the Log Analytics workspace | `string` | `log-{owner}-{name}-{env}` |
 | action_group_name | Name of the action group for alerts | `string` | `ag-{owner}-{name}-{env}` |
 | create_vnet | Whether to create a new virtual network | `bool` | `true` |

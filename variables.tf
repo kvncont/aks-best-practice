@@ -127,7 +127,7 @@ variable "sku_tier" {
 variable "default_node_pool_name" {
   type        = string
   description = "Name of the default node pool"
-  default     = "default"
+  default     = "system"
 }
 
 variable "default_node_pool_vm_size" {
@@ -182,6 +182,7 @@ variable "default_node_pool_zones" {
 variable "additional_node_pools" {
   type = map(object({
     vm_size             = string
+    subnet_id           = optional(string)
     node_count          = optional(number, 1)
     min_count           = optional(number)
     max_count           = optional(number)
@@ -192,7 +193,7 @@ variable "additional_node_pools" {
     node_labels         = optional(map(string), {})
     node_taints         = optional(list(string), [])
   }))
-  description = "Map of additional node pools to create"
+  description = "Map of additional node pools to create. Each pool can optionally specify a subnet_id to use a different subnet/vnet."
   default     = {}
 }
 
@@ -349,6 +350,6 @@ variable "alert_email_receivers" {
 # User Assigned Identity
 variable "identity_name" {
   type        = string
-  description = "Name of the user-assigned managed identity (optional, defaults to id-{owner}-{name}-{env})"
+  description = "Name of the user-assigned managed identity (optional, defaults to uai-{owner}-{name}-{env})"
   default     = null
 }
