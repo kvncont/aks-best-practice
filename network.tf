@@ -35,3 +35,39 @@ resource "azurerm_subnet" "node_pool" {
   virtual_network_name = azurerm_virtual_network.main[0].name
   address_prefixes     = [each.value.subnet_address_prefix]
 }
+
+# Data source to get external VNet information when using external subnets
+locals {
+  # Collect all external subnet IDs that need peering
+  external_subnet_ids = compact(concat(
+    [!var.create_vnet && var.subnet_id != null ? var.subnet_id : null],
+    [for name, pool in var.additional_node_pools : pool.subnet_id if pool.subnet_id != null]
+  ))
+
+  # Extract VNet IDs from subnet IDs
+  # Subnet ID format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}
+  external_vnet_ids = distinct([
+    for subnet_id in local.external_subnet_ids :
+    join("/", slice(split("/", subnet_id), 0, 9))
+  ])
+
+  # Create a map for peering with unique names
+  peering_vnets = var.create_vnet && var.enable_vnet_peering ? {
+    for idx, vnet_id in local.external_vnet_ids :
+    "peer-to-external-${idx}" => vnet_id
+  } : {}
+}
+
+# VNet Peering from our VNet to external VNets
+resource "azurerm_virtual_network_peering" "to_external" {
+  for_each = local.peering_vnets
+
+  name                      = each.key
+  resource_group_name       = azurerm_resource_group.main.name
+  virtual_network_name      = azurerm_virtual_network.main[0].name
+  remote_virtual_network_id = each.value
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = true
+  allow_gateway_transit        = false
+}

@@ -69,6 +69,12 @@ variable "subnet_id" {
   default     = null
 }
 
+variable "enable_vnet_peering" {
+  type        = bool
+  description = "Enable VNet peering from created VNet to external VNets when using external subnets"
+  default     = true
+}
+
 variable "app_gateway_subnet_name" {
   type        = string
   description = "Name of the subnet for Application Gateway"

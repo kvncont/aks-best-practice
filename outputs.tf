@@ -119,3 +119,17 @@ output "log_analytics_workspace_name" {
   description = "Name of the Log Analytics workspace"
   value       = var.enable_log_analytics ? azurerm_log_analytics_workspace.main[0].name : null
 }
+
+# VNet Peering
+output "vnet_peering_ids" {
+  description = "IDs of VNet peerings created from this module's VNet to external VNets"
+  value       = { for k, v in azurerm_virtual_network_peering.to_external : k => v.id }
+}
+
+output "vnet_peering_status" {
+  description = "Status of VNet peerings - note that reverse peering must be configured by external VNet owners"
+  value = length(azurerm_virtual_network_peering.to_external) > 0 ? {
+    peerings_created = keys(azurerm_virtual_network_peering.to_external)
+    note             = "Reverse peering from external VNets must be configured by their respective owners"
+  } : null
+}

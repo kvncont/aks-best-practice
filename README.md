@@ -187,6 +187,7 @@ module "aks" {
     }
     
     # This pool will use an existing subnet from a different VNet
+    # VNet peering will be automatically created (one-way from our VNet to external)
     external = {
       vm_size   = "Standard_D4s_v3"
       subnet_id = "/subscriptions/.../subnets/external-subnet"
@@ -197,6 +198,41 @@ module "aks" {
   }
 }
 ```
+
+### VNet Peering with External Subnets
+
+When using external subnets (not created by this module), the module automatically creates VNet peering from the created VNet to external VNets:
+
+```hcl
+module "aks" {
+  source = "github.com/kvncont/aks-best-practice.git"
+
+  owner = "myteam"
+  name  = "app"
+  env   = "prod"
+  location = "eastus"
+
+  # Create our VNet
+  create_vnet        = true
+  vnet_address_space = ["10.0.0.0/16"]
+
+  # Additional node pools using external subnets
+  additional_node_pools = {
+    workload = {
+      vm_size   = "Standard_D4s_v3"
+      subnet_id = "/subscriptions/.../resourceGroups/external-rg/providers/Microsoft.Network/virtualNetworks/external-vnet/subnets/external-subnet"
+      min_count = 1
+      max_count = 3
+      enable_auto_scaling = true
+    }
+  }
+
+  # Enable automatic VNet peering (default: true)
+  enable_vnet_peering = true
+}
+```
+
+**Important**: The module creates one-way VNet peering from the created VNet to external VNets. The owners of external VNets must configure the reverse peering for bi-directional connectivity.
 
 ## Module Structure
 
