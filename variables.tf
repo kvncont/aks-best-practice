@@ -69,10 +69,17 @@ variable "subnet_id" {
   default     = null
 }
 
-variable "enable_vnet_peering" {
-  type        = bool
-  description = "Enable VNet peering from created VNet to external VNets when using external subnets"
-  default     = true
+# VNet Peering Configuration
+variable "vnet_peerings" {
+  type = map(object({
+    remote_vnet_id               = string
+    allow_virtual_network_access = optional(bool, true)
+    allow_forwarded_traffic      = optional(bool, true)
+    allow_gateway_transit        = optional(bool, false)
+    use_remote_gateways          = optional(bool, false)
+  }))
+  description = "Map of VNet peerings to create from this VNet to remote VNets. Only applicable when create_vnet is true."
+  default     = {}
 }
 
 variable "app_gateway_subnet_name" {

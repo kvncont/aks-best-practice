@@ -187,7 +187,6 @@ module "aks" {
     }
     
     # This pool will use an existing subnet from a different VNet
-    # VNet peering will be automatically created (one-way from our VNet to external)
     external = {
       vm_size   = "Standard_D4s_v3"
       subnet_id = "/subscriptions/.../subnets/external-subnet"
@@ -199,9 +198,9 @@ module "aks" {
 }
 ```
 
-### VNet Peering with External Subnets
+### Optional VNet Peering
 
-When using external subnets (not created by this module), the module automatically creates VNet peering from the created VNet to external VNets:
+You can optionally configure VNet peering to connect your VNet with other VNets:
 
 ```hcl
 module "aks" {
@@ -216,23 +215,35 @@ module "aks" {
   create_vnet        = true
   vnet_address_space = ["10.0.0.0/16"]
 
-  # Additional node pools using external subnets
+  # Optional VNet peering configuration
+  vnet_peerings = {
+    "to-external-vnet" = {
+      remote_vnet_id               = "/subscriptions/.../resourceGroups/external-rg/providers/Microsoft.Network/virtualNetworks/external-vnet"
+      allow_virtual_network_access = true
+      allow_forwarded_traffic      = true
+      allow_gateway_transit        = false
+      use_remote_gateways          = false
+    }
+    "to-another-vnet" = {
+      remote_vnet_id = "/subscriptions/.../resourceGroups/another-rg/providers/Microsoft.Network/virtualNetworks/another-vnet"
+      # Uses default values for other settings
+    }
+  }
+
+  # Node pools can use subnets from peered VNets
   additional_node_pools = {
     workload = {
       vm_size   = "Standard_D4s_v3"
-      subnet_id = "/subscriptions/.../resourceGroups/external-rg/providers/Microsoft.Network/virtualNetworks/external-vnet/subnets/external-subnet"
+      subnet_id = "/subscriptions/.../resourceGroups/external-rg/providers/Microsoft.Network/virtualNetworks/external-vnet/subnets/workload-subnet"
       min_count = 1
       max_count = 3
       enable_auto_scaling = true
     }
   }
-
-  # Enable automatic VNet peering (default: true)
-  enable_vnet_peering = true
 }
 ```
 
-**Important**: The module creates one-way VNet peering from the created VNet to external VNets. The owners of external VNets must configure the reverse peering for bi-directional connectivity.
+**Note**: This creates one-way peering from the created VNet to remote VNets. Reverse peering must be configured separately (either manually or by the remote VNet owners) for bi-directional connectivity.
 
 ## Module Structure
 
