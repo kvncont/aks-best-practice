@@ -35,13 +35,15 @@ module "aks" {
   # Additional Node Pools
   additional_node_pools = {
     workload = {
-      vm_size             = "Standard_D4s_v3"
-      enable_auto_scaling = true
-      min_count           = 1
-      max_count           = 3
-      max_pods            = 30
-      os_disk_size_gb     = 128
-      zones               = ["1", "2", "3"]
+      vm_size               = "Standard_D4s_v3"
+      create_subnet         = true
+      subnet_address_prefix = "10.0.10.0/24"
+      enable_auto_scaling   = true
+      min_count             = 1
+      max_count             = 3
+      max_pods              = 30
+      os_disk_size_gb       = 128
+      zones                 = ["1", "2", "3"]
       node_labels = {
         workload = "general"
       }

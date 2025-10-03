@@ -181,19 +181,21 @@ variable "default_node_pool_zones" {
 # Additional Node Pools
 variable "additional_node_pools" {
   type = map(object({
-    vm_size             = string
-    subnet_id           = optional(string)
-    node_count          = optional(number, 1)
-    min_count           = optional(number)
-    max_count           = optional(number)
-    enable_auto_scaling = optional(bool, false)
-    max_pods            = optional(number, 30)
-    os_disk_size_gb     = optional(number, 128)
-    zones               = optional(list(string), ["1", "2", "3"])
-    node_labels         = optional(map(string), {})
-    node_taints         = optional(list(string), [])
+    vm_size               = string
+    subnet_id             = optional(string)
+    create_subnet         = optional(bool, false)
+    subnet_address_prefix = optional(string)
+    node_count            = optional(number, 1)
+    min_count             = optional(number)
+    max_count             = optional(number)
+    enable_auto_scaling   = optional(bool, false)
+    max_pods              = optional(number, 30)
+    os_disk_size_gb       = optional(number, 128)
+    zones                 = optional(list(string), ["1", "2", "3"])
+    node_labels           = optional(map(string), {})
+    node_taints           = optional(list(string), [])
   }))
-  description = "Map of additional node pools to create. Each pool can optionally specify a subnet_id to use a different subnet/vnet."
+  description = "Map of additional node pools to create. Each pool can optionally specify a subnet_id to use an existing subnet, or set create_subnet=true with subnet_address_prefix to create a new dedicated subnet."
   default     = {}
 }
 

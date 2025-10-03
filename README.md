@@ -135,9 +135,6 @@ module "aks" {
 module "aks" {
   source = "github.com/kvncont/aks-best-practice.git"
 
-module "aks" {
-  source = "github.com/kvncont/aks-best-practice.git"
-
   # Naming Configuration
   owner = "myteam"
   name  = "app"
@@ -149,6 +146,55 @@ module "aks" {
   # Use existing VNet
   create_vnet = false
   subnet_id   = "/subscriptions/.../subnets/existing-subnet"
+}
+```
+
+### Node Pools with Dedicated Subnets
+
+Each additional node pool can have its own dedicated subnet within the VNet:
+
+```hcl
+module "aks" {
+  source = "github.com/kvncont/aks-best-practice.git"
+
+  owner = "myteam"
+  name  = "app"
+  env   = "prod"
+  location = "eastus"
+
+  # Create VNet with larger address space
+  create_vnet        = true
+  vnet_address_space = ["10.0.0.0/16"]
+
+  # Additional node pools with dedicated subnets
+  additional_node_pools = {
+    # This pool will use the same subnet as default node pool
+    system2 = {
+      vm_size   = "Standard_D2s_v3"
+      min_count = 1
+      max_count = 3
+      enable_auto_scaling = true
+    }
+    
+    # This pool will have its own dedicated subnet
+    workload = {
+      vm_size               = "Standard_D4s_v3"
+      create_subnet         = true
+      subnet_address_prefix = "10.0.10.0/24"
+      min_count             = 1
+      max_count             = 5
+      enable_auto_scaling   = true
+    }
+    
+    # This pool will use an existing subnet from a different VNet
+    external = {
+      vm_size   = "Standard_D4s_v3"
+      subnet_id = "/subscriptions/.../subnets/external-subnet"
+      min_count = 1
+      max_count = 3
+      enable_auto_scaling = true
+    }
+  }
 }
 ```
 
